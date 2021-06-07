@@ -6,6 +6,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import DSPPCode.flink.twitter_hot_topics.impl.TwitterTextHandlerImpl;
+import java.io.IOException;
 
 /**
  * @author ikroal
@@ -23,6 +24,7 @@ public abstract class TwitterHotTopics {
 
     // 从文本中读取数据
     DataStream<String> streamSource = env.readTextFile(args[0]);
+    StopWordsOperation.stopWordsPath = args[2];
     // 对Twitter文本做处理
     DataStream<String> twitterText = streamSource.map(new TwitterTextHandlerImpl());
     // 统计文本中的热点话题
@@ -32,12 +34,12 @@ public abstract class TwitterHotTopics {
     hotTopics.writeAsText(args[1]);
 
     // 设置停词表的路径
-    StopWordsOperation.stopWordsPath = args[2];
+
     env.execute(getClass().getName());
 
     return 0;
   }
 
   protected abstract DataStream<Tuple2<String, Integer>> findHotTopics(
-      DataStream<String> twitterText);
+      DataStream<String> twitterText) throws IOException;
 }
